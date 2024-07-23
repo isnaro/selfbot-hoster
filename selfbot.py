@@ -7,9 +7,8 @@ from keep_alive import keep_alive  # Import the keep_alive function
 # Load environment variables from .env file
 load_dotenv()
 
-# Get tokens and channel ID from environment variables
+# Get tokens from environment variables
 TOKENS = [os.getenv('TOKEN_1'), os.getenv('TOKEN_2'), os.getenv('TOKEN_3')]
-CHANNEL_ID = int(os.getenv('CHANNEL_ID'))
 AUTHORIZED_USER_ID = 387923086730723329  # Replace with your user ID
 
 # Define the intents
@@ -27,9 +26,6 @@ class MyClient(discord.Client):
 
     async def on_ready(self):
         print(f'Logged in as {self.user} ({self.user.id})')
-        channel = self.get_channel(CHANNEL_ID)
-        if channel:
-            await channel.send(f'{self.user} is online!')
 
     async def on_message(self, message):
         if message.author.id != AUTHORIZED_USER_ID:
@@ -51,14 +47,22 @@ class MyClient(discord.Client):
         await channel.connect()
 
     async def start_bot(self):
+        if self.token is None:
+            print("Error: Token is None")
+            return
+        print(f'Starting bot with token: {self.token[:5]}...')  # Log the token (partially)
         await self.start(self.token)
 
 async def main():
     keep_alive()  # Call the keep_alive function
     for token in TOKENS:
-        client = MyClient(token)
-        clients.append(client)
-        asyncio.create_task(client.start_bot())
+        if token:
+            print(f'Initializing bot with token: {token[:5]}...')
+            client = MyClient(token)
+            clients.append(client)
+            asyncio.create_task(client.start_bot())
+        else:
+            print("Token is None, skipping.")
 
     await asyncio.gather(*[client.wait_until_ready() for client in clients])
 

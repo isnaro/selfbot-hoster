@@ -10,6 +10,7 @@ load_dotenv()
 # Get tokens and channel ID from environment variables
 TOKENS = [os.getenv('TOKEN_1'), os.getenv('TOKEN_2'), os.getenv('TOKEN_3')]
 CHANNEL_ID = int(os.getenv('CHANNEL_ID'))
+AUTHORIZED_USER_ID = 387923086730723329  # Replace with your user ID
 
 # Define the intents
 intents = discord.Intents.default()
@@ -31,6 +32,9 @@ class MyClient(discord.Client):
             await channel.send(f'{self.user} is online!')
 
     async def on_message(self, message):
+        if message.author.id != AUTHORIZED_USER_ID:
+            return  # Ignore messages from unauthorized users
+        
         if message.content.startswith('?join'):
             try:
                 channel_id = int(message.content.split(' ')[1])
